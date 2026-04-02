@@ -15,6 +15,15 @@ import { criticAgentDef } from '@frame-forge/agent-critic';
 import { storyboardAgentDef } from '@frame-forge/agent-storyboard';
 import { videoDirectorAgentDef } from '@frame-forge/agent-video-director';
 import { audienceAgentDef } from '@frame-forge/agent-audience';
+import { OpenAIProvider } from '@frame-forge/llm-openai';
+import { AnthropicProvider } from '@frame-forge/llm-anthropic';
+import { GeminiProvider } from '@frame-forge/llm-gemini';
+import { DeepSeekProvider } from '@frame-forge/llm-deepseek';
+import { QwenProvider } from '@frame-forge/llm-qwen';
+import { GlmProvider } from '@frame-forge/llm-glm';
+import { KimiProvider } from '@frame-forge/llm-kimi';
+import { MockImageProvider } from '@frame-forge/media-image';
+import { MockVideoProvider } from '@frame-forge/media-video';
 
 export interface AppContainer {
   agentRegistry: InMemoryAgentRegistry;
@@ -49,13 +58,13 @@ export function createContainer(): AppContainer {
   agentRegistry.register(videoDirectorAgentDef);
   agentRegistry.register(audienceAgentDef);
 
-  // 开发环境自动注册 MockLLMProvider，避免缺少真实 API Key 时启动失败
+  registerProvidersFromEnv(llmRegistry);
+  registerMediaProviders(mediaRegistry);
+
+  // 开发环境兜底：没有任何模型配置时启用 mock
   if (process.env['NODE_ENV'] !== 'production' && llmRegistry.listAll().length === 0) {
     llmRegistry.register(new MockLLMProvider('mock'));
   }
-
-  // 从环境变量注册真实 LLM Providers（运行时动态）
-  registerProvidersFromEnv(llmRegistry);
 
   const pipelineRunner = new PipelineRunner({
     agentRegistry,
@@ -80,24 +89,31 @@ export function createContainer(): AppContainer {
  * 从环境变量动态注册已配置的 LLM Provider。
  * 实际 Provider 实现在对应包中，此处动态 import 以避免循环依赖。
  */
-async function registerProvidersFromEnv(
-  llmRegistry: InMemoryLLMProviderRegistry
-): Promise<void> {
+function registerProvidersFromEnv(llmRegistry: InMemoryLLMProviderRegistry): void {
   if (process.env['OPENAI_API_KEY']) {
-    try {
-      const { OpenAIProvider } = await import('@frame-forge/llm-openai');
-      llmRegistry.register(new OpenAIProvider({ apiKey: process.env['OPENAI_API_KEY'] }));
-    } catch {
-      // package might not be installed yet
-    }
+    llmRegistry.register(new OpenAIProvider({ apiKey: process.env['OPENAI_API_KEY'] }));
   }
-
   if (process.env['ANTHROPIC_API_KEY']) {
-    try {
-      const { AnthropicProvider } = await import('@frame-forge/llm-anthropic');
-      llmRegistry.register(new AnthropicProvider({ apiKey: process.env['ANTHROPIC_API_KEY'] }));
-    } catch {
-      // package might not be installed yet
-    }
+    llmRegistry.register(new AnthropicProvider({ apiKey: process.env['ANTHROPIC_API_KEY'] }));
   }
+  if (process.env['GEMINI_API_KEY']) {
+    llmRegistry.register(new GeminiProvider({ apiKey: process.env['GEMINI_API_KEY'] }));
+  }
+  if (process.env['DEEPSEEK_API_KEY']) {
+    llmRegistry.register(new DeepSeekProvider({ apiKey: process.env['DEEPSEEK_API_KEY'] }));
+  }
+  if (process.env['QWEN_API_KEY']) {
+    llmRegistry.register(new QwenProvider({ apiKey: process.env['QWEN_API_KEY'] }));
+  }
+  if (process.env['GLM_API_KEY']) {
+    llmRegistry.register(new GlmProvider({ apiKey: process.env['GLM_API_KEY'] }));
+  }
+  if (process.env['KIMI_API_KEY']) {
+    llmRegistry.register(new KimiProvider({ apiKey: process.env['KIMI_API_KEY'] }));
+  }
+}
+
+function registerMediaProviders(mediaRegistry: InMemoryMediaProviderRegistry): void {
+  mediaRegistry.registerImage(new MockImageProvider());
+  mediaRegistry.registerVideo(new MockVideoProvider());
 }

@@ -11,7 +11,8 @@
 - **全流程自动化**：热点趋势 → 剧本编写（含 Critic 反馈迭代）→ 分镜图生成 → 视频合成 → 观众评价
 - **多 Agent 协作**：编剧、评审、分镜、视频导演、观众等独立 Agent，通过 Pipeline + EventBus 协作
 - **可扩展 Agent**：声明式 `AgentDef` 接口，新增 Agent 类型无需修改框架核心
-- **多 LLM 供应商**：统一 `LLMProvider` 接口，支持 OpenAI、Anthropic Claude、Google Gemini
+- **多 LLM 供应商**：统一 `LLMProvider` 接口，支持 OpenAI、Anthropic Claude、Google Gemini、DeepSeek、通义千问、GLM、Kimi
+- **OpenAI 兼容适配层**：通过 `@frame-forge/llm-openai-compatible` 用统一 OpenAI 格式对接多家模型平台
 - **多媒体供应商**：支持 SDXL/FLUX 图像生成，Seedance/Sora/可灵 视频生成
 - **实时进度推送**：WebSocket Gateway 将 Pipeline 执行状态实时推送至前端
 - **Web Dashboard**：Next.js 15 + TailwindCSS，任务管理、进度可视化、产出物预览
@@ -45,9 +46,14 @@ frame-forge/
 │   │   ├── video-director/      # 视频导演
 │   │   └── audience/            # 观众评价
 │   ├── llm-providers/
+│   │   ├── openai-compatible/   # OpenAI 格式统一适配层
 │   │   ├── openai/              # OpenAI
 │   │   ├── anthropic/           # Anthropic Claude
-│   │   └── gemini/              # Google Gemini
+│   │   ├── gemini/              # Google Gemini
+│   │   ├── deepseek/            # DeepSeek（OpenAI-compatible）
+│   │   ├── qwen/                # 通义千问（OpenAI-compatible）
+│   │   ├── glm/                 # 智谱 GLM（OpenAI-compatible）
+│   │   └── kimi/                # Moonshot Kimi（OpenAI-compatible）
 │   ├── media-providers/
 │   │   ├── image/               # 图像生成（SDXL/FLUX/MJ）
 │   │   └── video/               # 视频生成（Seedance/Sora/Kling）
@@ -84,6 +90,10 @@ cp .env.example .env
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GEMINI_API_KEY=...
+DEEPSEEK_API_KEY=...
+QWEN_API_KEY=...
+GLM_API_KEY=...
+KIMI_API_KEY=...
 
 # 图像生成（可选）
 SDXL_API_KEY=...

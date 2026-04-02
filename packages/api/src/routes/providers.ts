@@ -19,7 +19,15 @@ export const providersRoute: FastifyPluginAsync<ProvidersRouteOptions> = async (
       supportedModels: p.supportedModels,
     }));
 
-    return reply.send({ llm: llmProviders });
+    const imageProvider = mediaRegistry.getDefaultImage();
+    const videoProvider = mediaRegistry.getDefaultVideo();
+    return reply.send({
+      llm: llmProviders,
+      media: {
+        imageDefault: imageProvider.id,
+        videoDefault: videoProvider.id,
+      },
+    });
   });
 
   fastify.get('/agents', async (_req, reply) => {

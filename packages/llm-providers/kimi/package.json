@@ -1,8 +1,8 @@
 {
-  "name": "@frame-forge/llm-openai",
+  "name": "@frame-forge/llm-kimi",
   "version": "0.1.0",
   "private": true,
-  "description": "OpenAI LLM provider for frame-forge",
+  "description": "Kimi (Moonshot) provider via OpenAI-compatible adapter",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,8 +20,7 @@
   },
   "dependencies": {
     "@frame-forge/core": "workspace:*",
-    "@frame-forge/llm-openai-compatible": "workspace:*",
-    "openai": "^4.77.3"
+    "@frame-forge/llm-openai-compatible": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3",

@@ -1,8 +1,8 @@
 {
-  "name": "@frame-forge/llm-openai",
+  "name": "@frame-forge/media-video",
   "version": "0.1.0",
   "private": true,
-  "description": "OpenAI LLM provider for frame-forge",
+  "description": "Video providers for frame-forge",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,9 +19,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@frame-forge/core": "workspace:*",
-    "@frame-forge/llm-openai-compatible": "workspace:*",
-    "openai": "^4.77.3"
+    "@frame-forge/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
