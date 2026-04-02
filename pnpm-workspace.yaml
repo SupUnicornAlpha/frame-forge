@@ -1,0 +1,5 @@
+packages:
+  - "packages/*"
+  - "packages/agents/*"
+  - "packages/llm-providers/*"
+  - "packages/media-providers/*"
