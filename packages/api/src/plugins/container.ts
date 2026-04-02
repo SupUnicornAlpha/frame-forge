@@ -5,6 +5,9 @@ import {
   InMemoryCommandQueue,
   InMemoryEventBus,
   InMemoryMediaProviderRegistry,
+  InMemoryMcpRegistry,
+  createMcpCallTool,
+  FileSystemSkillsProvider,
   StandardAgentRunner,
   PipelineRunner,
   MockLLMProvider,
@@ -32,6 +35,7 @@ export interface AppContainer {
   commandQueue: InMemoryCommandQueue;
   eventBus: InMemoryEventBus;
   mediaRegistry: InMemoryMediaProviderRegistry;
+  mcpRegistry: InMemoryMcpRegistry;
   agentRunner: StandardAgentRunner;
   pipelineRunner: PipelineRunner;
 }
@@ -48,8 +52,15 @@ export function createContainer(): AppContainer {
   const commandQueue = new InMemoryCommandQueue();
   const eventBus = new InMemoryEventBus();
   const mediaRegistry = new InMemoryMediaProviderRegistry();
-  const agentRunner = new StandardAgentRunner(llmRegistry, toolRegistry);
+  const mcpRegistry = new InMemoryMcpRegistry();
+  const skillsProvider = new FileSystemSkillsProvider({
+    rootDir: process.env['SKILLS_ROOT_DIR'] ?? `${process.cwd()}/skills`,
+  });
+  const agentRunner = new StandardAgentRunner(llmRegistry, toolRegistry, {
+    skillsProvider,
+  });
   const agentRegistry = new InMemoryAgentRegistry();
+  toolRegistry.register(createMcpCallTool(mcpRegistry));
 
   agentRegistry.register(trendScoutAgentDef);
   agentRegistry.register(screenwriterAgentDef);
@@ -80,6 +91,7 @@ export function createContainer(): AppContainer {
     commandQueue,
     eventBus,
     mediaRegistry,
+    mcpRegistry,
     agentRunner,
     pipelineRunner,
   };

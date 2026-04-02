@@ -14,6 +14,9 @@
 - **多 LLM 供应商**：统一 `LLMProvider` 接口，支持 OpenAI、Anthropic Claude、Google Gemini、DeepSeek、通义千问、GLM、Kimi
 - **OpenAI 兼容适配层**：通过 `@frame-forge/llm-openai-compatible` 用统一 OpenAI 格式对接多家模型平台
 - **多媒体供应商**：支持 SDXL/FLUX 图像生成，Seedance/Sora/可灵 视频生成
+- **完整 Agent Loop**：支持多轮推理 + 工具调用循环，直到 stop 或最大轮次
+- **MCP 能力接入**：内置 `mcp_call` 工具，可通过 MCP registry 转发到外部 MCP server
+- **Skills 注入**：支持按任务动态读取 `skills/<id>/SKILL.md` 并注入系统提示词
 - **实时进度推送**：WebSocket Gateway 将 Pipeline 执行状态实时推送至前端
 - **Web Dashboard**：Next.js 15 + TailwindCSS，任务管理、进度可视化、产出物预览
 
@@ -101,6 +104,9 @@ SDXL_API_KEY=...
 # 视频生成（可选）
 SEEDANCE_API_KEY=...
 KLING_API_KEY=...
+
+# Skills 目录（用于 Agent system prompt 注入）
+SKILLS_ROOT_DIR=./skills
 
 # 前端配置
 NEXT_PUBLIC_API_URL=http://localhost:3001

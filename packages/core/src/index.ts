@@ -5,3 +5,5 @@ export * from './events/index.js';
 export * from './queue/index.js';
 export * from './pipeline/index.js';
 export * from './media/index.js';
+export * from './mcp/index.js';
+export * from './skills/index.js';

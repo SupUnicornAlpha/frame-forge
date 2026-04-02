@@ -1,6 +1,8 @@
 import type { AgentContext, AgentDef, AgentMessage, AgentRunResult, TokenUsage } from './types.js';
 import type { LLMProviderRegistry } from '../llm/types.js';
 import type { ToolRegistry } from '../tool/types.js';
+import { ToolOrchestrator } from '../tool/orchestrator.js';
+import type { SkillsProvider } from '../skills/types.js';
 
 /**
  * AgentRunner 接口：执行 AgentDef 的核心运行时。
@@ -61,10 +63,18 @@ export function createSubagentContext(
  * 标准 AgentRunner 实现：工具循环式 Agent 执行引擎。
  */
 export class StandardAgentRunner implements AgentRunner {
+  private readonly toolOrchestrator: ToolOrchestrator;
+
   constructor(
     private readonly llmRegistry: LLMProviderRegistry,
-    private readonly toolRegistry: ToolRegistry
-  ) {}
+    private readonly toolRegistry: ToolRegistry,
+    private readonly options: {
+      skillsProvider?: SkillsProvider;
+      toolOrchestrator?: ToolOrchestrator;
+    } = {}
+  ) {
+    this.toolOrchestrator = options.toolOrchestrator ?? new ToolOrchestrator(toolRegistry);
+  }
 
   async run<TInput, TOutput>(
     def: AgentDef<TInput, TOutput>,
@@ -79,8 +89,9 @@ export class StandardAgentRunner implements AgentRunner {
     await def.hooks?.beforeRun?.(ctx, input);
 
     try {
-      const systemPrompt =
+      const systemPromptRaw =
         typeof def.systemPrompt === 'function' ? def.systemPrompt(ctx) : def.systemPrompt;
+      const systemPrompt = await this.buildSystemPrompt(systemPromptRaw, def, input, ctx);
 
       messages.push({
         role: 'system',
@@ -132,19 +143,18 @@ export class StandardAgentRunner implements AgentRunner {
         }
 
         if (response.finishReason === 'tool_calls' && response.message.toolCalls?.length) {
-          for (const toolCall of response.message.toolCalls) {
-            const toolDef = def.tools.find((t) => t.name === toolCall.name)
-              ?? this.toolRegistry.get(toolCall.name);
-
-            if (!toolDef) {
-              throw new Error(`Tool "${toolCall.name}" not found`);
-            }
-
-            const toolResult = await toolDef.execute(toolCall.arguments, ctx);
+          const toolResults = await this.toolOrchestrator.runToolCalls(
+            response.message.toolCalls,
+            def.tools,
+            ctx
+          );
+          for (const r of toolResults) {
             const toolMsg: AgentMessage = {
               role: 'tool',
-              content: JSON.stringify(toolResult),
-              toolCallId: toolCall.id,
+              content: JSON.stringify(
+                r.error ? { ok: false, error: r.error, output: r.output } : { ok: true, output: r.output }
+              ),
+              toolCallId: r.toolCallId,
               timestamp: new Date(),
             };
             messages.push(toolMsg);
@@ -191,5 +201,21 @@ export class StandardAgentRunner implements AgentRunner {
         `Agent "${def.role}" output could not be parsed as expected schema. Raw: ${content.slice(0, 200)}`
       );
     }
+  }
+
+  private async buildSystemPrompt<TInput, TOutput>(
+    basePrompt: string,
+    def: AgentDef<TInput, TOutput>,
+    input: TInput,
+    ctx: AgentContext
+  ): Promise<string> {
+    if (!this.options.skillsProvider) return basePrompt;
+    const skills = await this.options.skillsProvider.getSkills(ctx, def, input);
+    if (skills.length === 0) return basePrompt;
+
+    const skillsText = skills
+      .map((s) => `## Skill: ${s.title}\n${s.content}`)
+      .join('\n\n');
+    return `${basePrompt}\n\n---\n\n# Loaded Skills\n${skillsText}`;
   }
 }
