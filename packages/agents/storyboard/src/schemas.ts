@@ -31,5 +31,7 @@ export const StoryboardOutputSchema = z.object({
   styleGuide: z.string().describe('整体风格指南'),
 });
 
-export type StoryboardInput = z.infer<typeof StoryboardInputSchema>;
+// 注意：inputSchema 内部使用了 z.default()，其 input 类型可能包含 undefined
+// 在 strict/exactOptionalPropertyTypes 下需要用 z.input 对齐。
+export type StoryboardInput = z.input<typeof StoryboardInputSchema>;
 export type StoryboardOutput = z.infer<typeof StoryboardOutputSchema>;

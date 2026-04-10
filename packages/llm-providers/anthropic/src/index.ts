@@ -55,8 +55,8 @@ export class AnthropicProvider implements LLMProvider {
       max_tokens: req.maxTokens ?? 4096,
       system: systemMessage,
       messages: userMessages,
-      temperature: req.temperature,
-      tools: tools.length > 0 ? tools : undefined,
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
+      ...(tools.length > 0 ? { tools } : {}),
     });
 
     const toolUseBlocks = response.content.filter(
@@ -98,7 +98,7 @@ export class AnthropicProvider implements LLMProvider {
       max_tokens: req.maxTokens ?? 4096,
       system: systemMessage,
       messages: userMessages,
-      temperature: req.temperature,
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
     });
 
     for await (const event of stream) {

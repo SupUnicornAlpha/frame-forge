@@ -31,19 +31,23 @@ export class OpenAICompatibleProvider implements LLMProvider {
   }
 
   async complete(req: CompletionRequest): Promise<CompletionResponse> {
-    const response = await this.client.chat.completions.create({
-      model: req.model,
-      messages: this.toOpenAIMessages(req.messages),
-      temperature: req.temperature,
-      max_tokens: req.maxTokens,
-      tools: req.tools?.map((t) => ({
+    const tools =
+      req.tools?.map((t) => ({
         type: 'function' as const,
         function: {
           name: t.name,
           description: t.description,
+          // 这里只提供一个占位 schema，框架后续可在 ToolDef→OpenAI 参数处做更完整的转换
           parameters: { type: 'object', description: 'Input schema' },
         },
-      })),
+      })) ?? [];
+
+    const response = await this.client.chat.completions.create({
+      model: req.model,
+      messages: this.toOpenAIMessages(req.messages),
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
+      ...(req.maxTokens !== undefined ? { max_tokens: req.maxTokens } : {}),
+      ...(tools.length > 0 ? { tools } : {}),
     });
 
     const choice = response.choices[0];
@@ -75,18 +79,19 @@ export class OpenAICompatibleProvider implements LLMProvider {
     const stream = await this.client.chat.completions.create({
       model: req.model,
       messages: this.toOpenAIMessages(req.messages),
-      temperature: req.temperature,
-      max_tokens: req.maxTokens,
+      ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
+      ...(req.maxTokens !== undefined ? { max_tokens: req.maxTokens } : {}),
       stream: true,
     });
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta;
       if (!delta) continue;
+      const mappedRole = mapDeltaRole(delta.role);
       yield {
         delta: {
-          role: delta.role ?? undefined,
-          content: delta.content ?? undefined,
+          ...(mappedRole ? { role: mappedRole } : {}),
+          ...(typeof delta.content === 'string' ? { content: delta.content } : {}),
         },
         finishReason: chunk.choices[0]?.finish_reason ?? undefined,
       };
@@ -119,6 +124,13 @@ export class OpenAICompatibleProvider implements LLMProvider {
       } as OpenAI.Chat.Completions.ChatCompletionMessageParam;
     });
   }
+}
+
+function mapDeltaRole(
+  role: string | null | undefined
+): LLMMessage['role'] | undefined {
+  if (role === 'assistant' || role === 'system' || role === 'user' || role === 'tool') return role;
+  return undefined;
 }
 
 function safeJsonParse(raw: string): unknown {

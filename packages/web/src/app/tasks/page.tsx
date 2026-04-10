@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { api, type Task } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ const STATUS_CONFIG = {
 } as const;
 
 export default async function TasksPage() {
-  let tasks = [];
+  let tasks: Task[] = [];
   try {
     tasks = await api.tasks.list();
   } catch {

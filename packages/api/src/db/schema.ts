@@ -2,6 +2,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const tasks = sqliteTable('tasks', {
   id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull().default('default-tenant'),
   name: text('name').notNull(),
   status: text('status', {
     enum: ['pending', 'running', 'paused', 'completed', 'failed'],
@@ -16,6 +17,7 @@ export const tasks = sqliteTable('tasks', {
 
 export const taskSteps = sqliteTable('task_steps', {
   id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull().default('default-tenant'),
   taskId: text('task_id')
     .notNull()
     .references(() => tasks.id),
@@ -34,6 +36,7 @@ export const taskSteps = sqliteTable('task_steps', {
 
 export const taskArtifacts = sqliteTable('task_artifacts', {
   id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull().default('default-tenant'),
   taskId: text('task_id')
     .notNull()
     .references(() => tasks.id),
@@ -53,7 +56,32 @@ export const taskArtifacts = sqliteTable('task_artifacts', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
 
+export const providerSecrets = sqliteTable('provider_secrets', {
+  id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  encryptedToken: text('encrypted_token').notNull(),
+  createdBy: text('created_by').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+});
+
+export const auditLogs = sqliteTable('audit_logs', {
+  id: text('id').primaryKey(),
+  tenantId: text('tenant_id').notNull(),
+  userId: text('user_id').notNull(),
+  role: text('role').notNull(),
+  action: text('action').notNull(),
+  resource: text('resource').notNull(),
+  status: text('status', { enum: ['success', 'denied', 'error'] }).notNull(),
+  detail: text('detail'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+});
+
 export type Task = typeof tasks.$inferSelect;
 export type NewTask = typeof tasks.$inferInsert;
 export type TaskStep = typeof taskSteps.$inferSelect;
 export type TaskArtifact = typeof taskArtifacts.$inferSelect;
+export type ProviderSecret = typeof providerSecrets.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;

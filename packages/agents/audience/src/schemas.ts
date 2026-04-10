@@ -25,5 +25,6 @@ export const AudienceOutputSchema = z.object({
   targetAudienceFit: z.string().describe('与目标受众的契合度分析'),
 });
 
-export type AudienceInput = z.infer<typeof AudienceInputSchema>;
+// inputSchema 使用了 z.default()，在 exactOptionalPropertyTypes 下需要用 z.input 对齐
+export type AudienceInput = z.input<typeof AudienceInputSchema>;
 export type AudienceOutput = z.infer<typeof AudienceOutputSchema>;

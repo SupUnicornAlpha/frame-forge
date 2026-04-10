@@ -41,9 +41,15 @@ export interface AgentToolCall {
 }
 
 /** Agent 生命周期钩子 */
-export interface AgentHooks<TInput = unknown, TOutput = unknown> {
-  beforeRun?: (ctx: AgentContext, input: TInput) => Promise<void>;
-  afterRun?: (ctx: AgentContext, output: TOutput) => Promise<void>;
+/**
+ * Agent 生命周期钩子。
+ *
+ * 这里刻意使用 `unknown`，避免 `exactOptionalPropertyTypes + 严格函数参数方差`
+ * 下，注册不同 TInput/TOutput 的 AgentDef 时出现类型无法赋值的问题。
+ */
+export interface AgentHooks {
+  beforeRun?: (ctx: AgentContext, input: unknown) => Promise<void>;
+  afterRun?: (ctx: AgentContext, output: unknown) => Promise<void>;
   onError?: (ctx: AgentContext, error: Error) => Promise<void>;
   onTurn?: (ctx: AgentContext, turn: number) => Promise<void>;
 }
@@ -80,7 +86,7 @@ export interface AgentDef<TInput = unknown, TOutput = unknown> {
   capabilities?: string[] | undefined;
 
   /** 生命周期钩子 */
-  hooks?: AgentHooks<TInput, TOutput> | undefined;
+  hooks?: AgentHooks | undefined;
 }
 
 /** Agent 单次运行结果 */

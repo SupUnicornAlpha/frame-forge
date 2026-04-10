@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import type { InMemoryLLMProviderRegistry, InMemoryMediaProviderRegistry } from '@frame-forge/core';
+import { requireRole } from '../security/auth.js';
 
 interface ProvidersRouteOptions {
   llmRegistry: InMemoryLLMProviderRegistry;
@@ -12,7 +13,9 @@ export const providersRoute: FastifyPluginAsync<ProvidersRouteOptions> = async (
 ) => {
   const { llmRegistry, mediaRegistry } = opts;
 
-  fastify.get('/providers', async (_req, reply) => {
+  fastify.get('/providers', async (req, reply) => {
+    const auth = requireRole(req, reply, 'member');
+    if (!auth) return;
     const llmProviders = llmRegistry.listAll().map((p) => ({
       id: p.id,
       type: 'llm',
@@ -30,7 +33,9 @@ export const providersRoute: FastifyPluginAsync<ProvidersRouteOptions> = async (
     });
   });
 
-  fastify.get('/agents', async (_req, reply) => {
+  fastify.get('/agents', async (req, reply) => {
+    const auth = requireRole(req, reply, 'member');
+    if (!auth) return;
     return reply.send({
       message: 'Use GET /providers for provider info',
     });

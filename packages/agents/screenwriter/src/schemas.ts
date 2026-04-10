@@ -56,5 +56,6 @@ export const ScreenwriterOutputSchema = z.object({
   marketAnalysis: z.string().describe('市场分析：为何这个剧本符合当下趋势'),
 });
 
-export type ScreenwriterInput = z.infer<typeof ScreenwriterInputSchema>;
+// inputSchema 使用了 z.default()，在 exactOptionalPropertyTypes 下需要用 z.input 对齐
+export type ScreenwriterInput = z.input<typeof ScreenwriterInputSchema>;
 export type ScreenwriterOutput = z.infer<typeof ScreenwriterOutputSchema>;

@@ -38,8 +38,9 @@ export class GeminiProvider implements LLMProvider {
     const chatMessages = req.messages.filter((m) => m.role !== 'system');
 
     const chat = model.startChat({
-      systemInstruction:
-        typeof systemInstruction === 'string' ? systemInstruction : undefined,
+      ...(typeof systemInstruction === 'string'
+        ? { systemInstruction }
+        : {}),
       history: chatMessages.slice(0, -1).map((m) => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: typeof m.content === 'string' ? m.content : JSON.stringify(m.content) }],

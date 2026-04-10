@@ -30,6 +30,7 @@ function Header() {
           <span className="font-semibold text-slate-900 text-sm">frame-forge</span>
         </div>
         <nav className="flex items-center gap-1">
+          <NavLink href="/">首页</NavLink>
           <NavLink href="/tasks">任务</NavLink>
           <NavLink href="/providers">供应商</NavLink>
           <NavLink href="/settings">设置</NavLink>

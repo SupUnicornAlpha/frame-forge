@@ -27,5 +27,7 @@ export const VideoDirectorOutputSchema = z.object({
   editingNotes: z.string().describe('剪辑建议'),
 });
 
-export type VideoDirectorInput = z.infer<typeof VideoDirectorInputSchema>;
+// 注意：inputSchema 内部使用了 z.default()，其 input 类型可能包含 undefined
+// 在 strict/exactOptionalPropertyTypes 下需要用 z.input 对齐。
+export type VideoDirectorInput = z.input<typeof VideoDirectorInputSchema>;
 export type VideoDirectorOutput = z.infer<typeof VideoDirectorOutputSchema>;

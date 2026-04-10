@@ -8,7 +8,9 @@ const McpCallInputSchema = z.object({
   arguments: z.record(z.unknown()).default({}),
 });
 
-export function createMcpCallTool(mcpRegistry: McpRegistry): ToolDef {
+type McpCallInput = z.input<typeof McpCallInputSchema>;
+
+export function createMcpCallTool(mcpRegistry: McpRegistry): ToolDef<McpCallInput, unknown> {
   return {
     name: 'mcp_call',
     description: 'Call a tool on a registered MCP server',
@@ -19,7 +21,7 @@ export function createMcpCallTool(mcpRegistry: McpRegistry): ToolDef {
       const result = await mcpRegistry.callTool({
         server: input.server,
         toolName: input.toolName,
-        arguments: input.arguments,
+        arguments: input.arguments ?? {},
       });
       return result;
     },

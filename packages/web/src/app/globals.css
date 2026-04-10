@@ -5,8 +5,109 @@
 :root {
   --foreground: 15 23 42;
   --background: 248 250 252;
+  --ff-surface: 255 255 255;
+  --ff-border: 226 232 240;
+  --ff-soft: 241 245 249;
+  --ff-brand: 79 70 229;
+  --ff-running: 37 99 235;
+  --ff-success: 5 150 105;
+  --ff-danger: 225 29 72;
+  --ff-ig-pink: 236 72 153;
+  --ff-ig-purple: 147 51 234;
+  --ff-ig-orange: 249 115 22;
 }
 
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
+  background-image:
+    radial-gradient(circle at 12% 14%, rgba(236, 72, 153, 0.13), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(147, 51, 234, 0.12), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(249, 115, 22, 0.09), transparent 32%);
+}
+
+.ff-panel {
+  @apply rounded-2xl border bg-white/70 shadow-sm backdrop-blur-md;
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 12px 40px rgba(147, 51, 234, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.ff-glow-running {
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25), 0 0 0 6px rgba(37, 99, 235, 0.1);
+}
+
+.ff-glow-danger {
+  box-shadow: 0 0 0 1px rgba(225, 29, 72, 0.3), 0 0 0 6px rgba(225, 29, 72, 0.12);
+}
+
+@keyframes ff-slide {
+  from {
+    transform: translateX(-30%);
+  }
+  to {
+    transform: translateX(140%);
+  }
+}
+
+@keyframes ff-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-ff-slide {
+  animation: ff-slide 1.4s linear infinite;
+}
+
+.animate-ff-breathe {
+  animation: ff-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes ff-edge-flow {
+  from {
+    stroke-dashoffset: 26;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ff-danger-blink {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ff-edge-flow {
+  stroke-dasharray: 6 6;
+  animation: ff-edge-flow 0.9s linear infinite;
+}
+
+.ff-danger-blink {
+  animation: ff-danger-blink 1s ease-in-out infinite;
+}
+
+.ff-ig-text {
+  background: linear-gradient(100deg, rgb(var(--ff-ig-orange)), rgb(var(--ff-ig-pink)), rgb(var(--ff-ig-purple)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ff-ig-chip {
+  @apply rounded-full border px-3 py-1 text-xs font-medium;
+  border-color: rgba(236, 72, 153, 0.28);
+  background: linear-gradient(120deg, rgba(236, 72, 153, 0.14), rgba(147, 51, 234, 0.1));
+  color: rgb(157 23 77);
 }

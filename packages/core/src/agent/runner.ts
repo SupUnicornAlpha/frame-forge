@@ -34,9 +34,9 @@ export function createAgentContext(params: {
     taskId: params.taskId,
     agentId: params.agentId,
     role: params.role,
-    parentContext: params.parentContext,
     sessionHistory: [],
     metadata: params.metadata ?? {},
+    ...(params.parentContext ? { parentContext: params.parentContext } : {}),
   };
 }
 
@@ -138,7 +138,7 @@ export class StandardAgentRunner implements AgentRunner {
         ctx.sessionHistory.push(assistantMsg);
 
         if (response.finishReason === 'stop') {
-          output = this.parseOutput<TOutput>(response.message.content as string, def);
+          output = this.parseOutput(response.message.content as string, def);
           break;
         }
 
@@ -181,7 +181,7 @@ export class StandardAgentRunner implements AgentRunner {
     }
   }
 
-  private parseOutput<TOutput>(content: string, def: AgentDef): TOutput {
+  private parseOutput<TInput, TOutput>(content: string, def: AgentDef<TInput, TOutput>): TOutput {
     if (!def.outputSchema) {
       try {
         return JSON.parse(content) as TOutput;

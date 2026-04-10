@@ -30,5 +30,6 @@ export const TrendScoutOutputSchema = z.object({
   recommendation: z.string().describe('综合推荐：最适合作为短剧主题的话题及原因'),
 });
 
-export type TrendScoutInput = z.infer<typeof TrendScoutInputSchema>;
+// inputSchema 使用了 z.default()，在 exactOptionalPropertyTypes 下需要用 z.input 对齐
+export type TrendScoutInput = z.input<typeof TrendScoutInputSchema>;
 export type TrendScoutOutput = z.infer<typeof TrendScoutOutputSchema>;
